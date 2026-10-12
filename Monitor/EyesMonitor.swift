@@ -16,13 +16,15 @@ final class EyesMonitor: DeviceActivityMonitor {
         guard let (id, minutes) = Monitor.parse(event) else { return }
         // Log only steps above what is already logged today (a re-arm can deliver an old step again).
         if minutes > Categories.reached(id) {
+            let since = Monitor.sinceArmed(id)
             Categories.setReached(id, minutes)
             log(id == Categories.total ? "total_threshold" : "category_threshold", id,
-                [("minutes", minutes), ("step", Eyes.stepMinutes)])
+                [("minutes", minutes), ("step", Eyes.stepMinutes),
+                 ("catchup", since < Monitor.catchUpSeconds ? 1 : 0), ("since_arm_s", Int(since))])
         }
         do { try Monitor.arm(id) } catch { log("arm_error", id, [("error", error.localizedDescription)]) }
-        // Try to send now; if the network is not allowed or not there, the app sends later.
-        Server.upload(wait: 15)
+        // Send what is waiting; the open file is closed only once it is 15 min old or large.
+        Server.upload(wait: 15, force: false)
     }
 
     override func intervalDidStart(for activity: DeviceActivityName) {
@@ -43,6 +45,12 @@ final class EyesMonitor: DeviceActivityMonitor {
     override func intervalDidEnd(for activity: DeviceActivityName) {
         super.intervalDidEnd(for: activity)
         let id = Monitor.id(of: activity)
-        log("day_end", id, [("minutes", Categories.reached(id))])
+        // arm() stops and restarts a ladder, and iOS reports that stop as an interval end.
+        // Log only a real end: the daily schedule closing at midnight.
+        if Monitor.rearming(id) { return }
+        let c = Calendar.current.dateComponents([.hour, .minute], from: Date())
+        if c.hour == 23 && (c.minute ?? 0) >= 58 || c.hour == 0 && (c.minute ?? 0) <= 1 {
+            log("day_end", id, [("minutes", Categories.reached(id))])
+        }
     }
 }

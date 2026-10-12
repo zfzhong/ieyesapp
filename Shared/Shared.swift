@@ -88,6 +88,9 @@ enum Log {
     static func append(_ rows: [String]) {
         guard !rows.isEmpty else { return }
         withEyesLock {
+            if !FileManager.default.fileExists(atPath: current.path) {
+                Eyes.defaults.set(Date().timeIntervalSince1970, forKey: "current_started")
+            }
             let data = (rows.joined(separator: "\n") + "\n").data(using: .utf8)!
             if let h = try? FileHandle(forWritingTo: current) {
                 h.seekToEndOfFile()
@@ -127,12 +130,20 @@ enum Chunks {
 
     /// Turns the rows logged so far into the next numbered chunk. Returns its number, or nil
     /// when there was nothing to close.
+    /// Close the open file only when it is old enough or big enough (unless forced), so a burst
+    /// of steps goes into one file instead of many one-row files.
+    static let minAgeSeconds: TimeInterval = 15 * 60
+    static let maxRows = 500
+
     @discardableResult
-    static func close(kind: String = "live") -> Int? {
+    static func close(kind: String = "live", force: Bool = true) -> Int? {
         withEyesLock {
             guard let text = try? String(contentsOf: Log.current, encoding: .utf8),
                   !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
             let rows = text.split(separator: "\n", omittingEmptySubsequences: true)
+            let started = Eyes.defaults.double(forKey: "current_started")
+            let age = started > 0 ? Date().timeIntervalSince1970 - started : .infinity
+            if !force && age < minAgeSeconds && rows.count < maxRows { return nil }
             let body = Log.header + "\n" + rows.joined(separator: "\n") + "\n"
             guard let gz = Gzip.compress(Data(body.utf8)) else { return nil }
             let seq = lastSeq + 1
@@ -306,8 +317,23 @@ enum Monitor {
                 applications: [], categories: tokens, webDomains: [],
                 threshold: DateComponents(hour: m / 60, minute: m % 60), includesPastActivity: true)
         }
+        Eyes.defaults.set(Date().timeIntervalSince1970, forKey: "armed_at.\(id)")
+        Eyes.defaults.set(Date().timeIntervalSince1970 + 5, forKey: "rearming_until.\(id)")
         center.stopMonitoring([activity(id)])
         try center.startMonitoring(activity(id), during: schedule, events: events)
+    }
+
+    /// Seconds since the ladder was last armed. A step that fires within catchUpSeconds of
+    /// arming was already passed before arming: usage had happened, but not at this time.
+    static let catchUpSeconds: TimeInterval = 30
+    static func sinceArmed(_ id: String) -> TimeInterval {
+        Date().timeIntervalSince1970 - Eyes.defaults.double(forKey: "armed_at.\(id)")
+    }
+
+    /// True while a ladder is being stopped and restarted by arm() (iOS then reports an
+    /// interval end that is not the end of the day).
+    static func rearming(_ id: String) -> Bool {
+        Date().timeIntervalSince1970 < Eyes.defaults.double(forKey: "rearming_until.\(id)")
     }
 
     static func armAll() -> [String] {
@@ -408,11 +434,12 @@ enum Server {
     /// Closes the current log into a chunk, sends every waiting chunk oldest first, then fills
     /// any holes the server reports. Same rules as Android: a chunk leaves outbox/ only after
     /// "stored" or "duplicate".
+    /// force=false (the monitor extension): close the open file only if it is 15 minutes old or
+    /// has 500 rows; still send any closed files that are waiting.
     @discardableResult
-    static func upload(wait: TimeInterval = 25) -> Bool {
-        guard let token else { return true }
-        _ = token
-        Chunks.close()
+    static func upload(wait: TimeInterval = 25, force: Bool = true) -> Bool {
+        guard token != nil else { return true }
+        Chunks.close(force: force)
         let deadline = Date().addingTimeInterval(wait)
         var ledger: [String: Any]?
         for f in Chunks.files(in: Chunks.outbox) {
