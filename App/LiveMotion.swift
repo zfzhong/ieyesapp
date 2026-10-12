@@ -36,6 +36,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         return q
     }()
     private var rows: [String] = []                 // touched only on `queue`
+    private var session: AnyObject?                 // CLBackgroundActivitySession (iOS 17+)
     private var timer: Timer?
     private var flushTimer: Timer?
     private(set) var running = false
@@ -81,7 +82,12 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         guard !running else { return }
         running = true
         location.allowsBackgroundLocationUpdates = true
-        location.showsBackgroundLocationIndicator = false
+        // Since iOS 16.4, iOS may suspend an app that uses coarse background location together
+        // with significant-change monitoring unless the blue location indicator is shown
+        // (Apple DTS, developer forums thread 726945). The indicator also tells the
+        // participant that iEyesApp is running.
+        location.showsBackgroundLocationIndicator = true
+        if #available(iOS 17.0, *), session == nil { session = CLBackgroundActivitySession() }
         location.startUpdatingLocation()
         location.startMonitoringSignificantLocationChanges()   // relaunches the app if iOS ends it
 
@@ -93,6 +99,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         flushTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.flush() }
         timer = Timer.scheduledTimer(withTimeInterval: 10 * 60, repeats: true) { [weak self] _ in self?.tick() }
         Log.append([Log.row("keepalive_start", detail: [("location", Self.authName(location.authorizationStatus)),
+                                                       ("state", UIApplication.shared.applicationState == .active ? "fg" : "bg"),
                                                        ("gyro", motion.isGyroAvailable ? 1 : 0),
                                                        ("mag", motion.isMagnetometerAvailable ? 1 : 0)])])
         IEyesApp.heartbeat("keepalive_start")
@@ -107,6 +114,8 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         location.stopUpdatingLocation()
         location.stopMonitoringSignificantLocationChanges()
         location.allowsBackgroundLocationUpdates = false
+        if #available(iOS 17.0, *) { (session as? CLBackgroundActivitySession)?.invalidate() }
+        session = nil
         timer?.invalidate(); timer = nil
         flushTimer?.invalidate(); flushTimer = nil
         flush()
@@ -179,8 +188,13 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    private var lastTick = Date()
+
     /// Every 10 minutes: heartbeat, close files, upload.
     private func tick() {
+        let late = Date().timeIntervalSince(lastTick) - 600
+        lastTick = Date()
+        if late > 60 { Log.append([Log.row("keepalive_late", detail: [("late_s", Int(late))])]) }
         flush()
         queue.addOperation {
             // Upload off the sensor queue so samples keep flowing while it runs.

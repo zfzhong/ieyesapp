@@ -25,7 +25,7 @@ struct IEyesApp: App {
         WindowGroup { ContentView() }
             .onChange(of: phase) { _, p in
                 if p == .background { Self.schedule() }
-                if p == .active { Self.motionRun() }
+                if p == .active { Self.motionRun(); LiveMotion.shared.apply() }
             }
     }
 
