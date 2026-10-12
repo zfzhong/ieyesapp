@@ -206,6 +206,22 @@ enum Categories {
 
     private static func encode(_ t: ActivityCategoryToken) -> Data? { try? JSONEncoder().encode(t) }
 
+    /// Version 0.1 kept one token per named category ("token.social" ...). Carry those over
+    /// once, names included, so a participant who already picked them need not pick again.
+    static func migrateNamedTokens() {
+        let d = Eyes.defaults
+        guard d.array(forKey: "category_tokens") == nil else { return }
+        var pairs: [(String, Data)] = []
+        for name in Eyes.categories {
+            let key = "token." + name.lowercased().filter { $0.isLetter || $0.isNumber }
+            if let data = d.data(forKey: key) { pairs.append((name, data)) }
+        }
+        guard !pairs.isEmpty else { return }
+        pairs.sort { $0.1.base64EncodedString() < $1.1.base64EncodedString() }
+        d.set(pairs.map(\.1), forKey: "category_tokens")
+        for (i, p) in pairs.enumerated() { d.set(p.0, forKey: "name.c\(i + 1)") }
+    }
+
     /// Picked tokens, keyed by id, in id order.
     static var picked: [(id: String, token: ActivityCategoryToken)] {
         guard let arr = Eyes.defaults.array(forKey: "category_tokens") as? [Data] else { return [] }

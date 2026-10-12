@@ -1,4 +1,5 @@
 import BackgroundTasks
+import FamilyControls
 import SwiftUI
 
 @main
@@ -7,6 +8,11 @@ struct IEyesApp: App {
     static let refreshTask = "com.zfzhong.ieyesapp.refresh"
 
     init() {
+        Categories.migrateNamedTokens()
+        // Keep the ladders armed whenever the app starts (also stops version 0.1's ladders).
+        if AuthorizationCenter.shared.authorizationStatus == .approved && !Categories.picked.isEmpty {
+            _ = Monitor.armAll()
+        }
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.refreshTask, using: nil) { task in
             Self.backgroundRun(task as! BGAppRefreshTask)
         }
