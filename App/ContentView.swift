@@ -18,6 +18,7 @@ struct ContentView: View {
                 serverSection
                 screenTimeSection
                 categorySection
+                motionSection
                 statusSection
             }
             .navigationTitle("iEyesApp")
@@ -119,6 +120,7 @@ struct ContentView: View {
             } else {
                 Button("Start monitoring") {
                     let errors = Monitor.armAll()
+                    Motion.keepRecording()
                     Log.append([Log.row("monitor_start", detail: [("categories", Categories.picked.count),
                                                                  ("ladders", Categories.ladders.count),
                                                                  ("errors", errors.count)])])
@@ -129,6 +131,27 @@ struct ContentView: View {
             }
         } header: { Text("Categories") } footer: {
             Text("Select all categories in Apple's list (tap each category, or the \"All\" option, and no single apps). Naming is optional: tap \"Name it\" and choose the name shown on the left, so the log can say \"Social\" instead of c3.")
+        }
+    }
+
+    private var motionSection: some View {
+        Section {
+            let _ = refresh
+            if !Motion.available {
+                Text("This device cannot record motion in the background.").foregroundStyle(.secondary)
+            } else if Motion.denied {
+                Text("Motion & Fitness access is off. Turn it on in Settings › Privacy & Security › Motion & Fitness.")
+                    .foregroundStyle(.red).font(.caption)
+            } else if let until = Motion.recordingUntil, until > Date() {
+                Label("Accelerometer recording", systemImage: "waveform.path").foregroundStyle(.green)
+                if let t = Motion.fetchedThrough {
+                    LabeledContent("Read through", value: t.formatted(date: .omitted, time: .shortened))
+                }
+            } else {
+                Text("Starts with monitoring.").foregroundStyle(.secondary)
+            }
+        } header: { Text("Motion") } footer: {
+            Text("The accelerometer is recorded by iOS in the background and read when iEyesApp runs: 5 samples a second while moving, 1 while still. The gyroscope and compass cannot run in the background on iOS.")
         }
     }
 

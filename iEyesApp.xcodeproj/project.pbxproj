@@ -12,6 +12,7 @@
 		672E43B05465E6C7B740F765 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE205275F57AEFFA8B240C6B /* Shared.swift */; };
 		8E1D003E471A1E8D2AAF409A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6E7E8BB4A9EF4A00F1CDD3 /* ContentView.swift */; };
 		8FBE4404C2DA688A35848CBD /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE205275F57AEFFA8B240C6B /* Shared.swift */; };
+		B43A30B8EBE22B23C97153ED /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1376CA0207F0528566F6F /* Motion.swift */; };
 		F09CDB283AD222AFFC47B4BA /* EyesMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A896C9C9706FF42BF7579 /* EyesMonitor.swift */; };
 		F7408B370503E4E3F680DD05 /* EyesMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D73F74D7646198B55EA53B20 /* EyesMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -44,6 +45,7 @@
 		02D69B51496C772A49C3A4CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0AA36130E3CA52CD935B1B6C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0AEF83441C76CD800F43CD0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2AC1376CA0207F0528566F6F /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
 		39A0AE75EDAE17C5A13EC594 /* iEyesApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = iEyesApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40159F54CBB6C5D9A326D2B6 /* iEyesApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iEyesApp.entitlements; sourceTree = "<group>"; };
 		5F94A2A36579A6A2A14D7ED1 /* EyesMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EyesMonitor.entitlements; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 				40159F54CBB6C5D9A326D2B6 /* iEyesApp.entitlements */,
 				E7AD972EFD61FE244896649C /* iEyesApp.swift */,
 				02D69B51496C772A49C3A4CB /* Info.plist */,
+				2AC1376CA0207F0528566F6F /* Motion.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -209,6 +212,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E1D003E471A1E8D2AAF409A /* ContentView.swift in Sources */,
+				B43A30B8EBE22B23C97153ED /* Motion.swift in Sources */,
 				672E43B05465E6C7B740F765 /* Shared.swift in Sources */,
 				061401821E58FB973E2E3639 /* iEyesApp.swift in Sources */,
 			);
@@ -291,7 +295,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -390,7 +394,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

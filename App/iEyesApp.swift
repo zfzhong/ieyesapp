@@ -14,6 +14,7 @@ struct IEyesApp: App {
             && !Eyes.defaults.bool(forKey: "monitoring_stopped") {
             _ = Monitor.armAll()
         }
+        Self.motionRun()
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.refreshTask, using: nil) { task in
             Self.backgroundRun(task as! BGAppRefreshTask)
         }
@@ -23,6 +24,7 @@ struct IEyesApp: App {
         WindowGroup { ContentView() }
             .onChange(of: phase) { _, p in
                 if p == .background { Self.schedule() }
+                if p == .active { Self.motionRun() }
             }
     }
 
@@ -45,14 +47,26 @@ struct IEyesApp: App {
             ("charging", state == .charging || state == .full ? 1 : 0),
             ("categories", Categories.picked.count),
             ("monitoring", Monitor.monitoring.count),
+            ("accel", Motion.authorized ? (Motion.enabled ? 1 : 0) : (Motion.denied ? -1 : 0)),
             ("app", "ios-\(Eyes.appVersion)"),
         ])])
+    }
+
+    /// On screen: keep the accelerometer recorder going and read what it has, then upload.
+    static func motionRun() {
+        guard !Eyes.defaults.bool(forKey: "monitoring_stopped"), !Categories.picked.isEmpty else { return }
+        Motion.keepRecording()
+        Task.detached(priority: .utility) {
+            if Motion.collect(budget: 60) > 0 { _ = Server.upload(wait: 60) }
+        }
     }
 
     static func backgroundRun(_ task: BGAppRefreshTask) {
         schedule()
         let work = Task.detached {
             heartbeat("background")
+            if !Eyes.defaults.bool(forKey: "monitoring_stopped") { Motion.keepRecording() }
+            Motion.collect(budget: 12)
             let ok = Server.upload(wait: 25)
             task.setTaskCompleted(success: ok)
         }

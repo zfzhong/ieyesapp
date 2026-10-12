@@ -144,31 +144,38 @@ enum Chunks {
             let started = Eyes.defaults.double(forKey: "current_started")
             let age = started > 0 ? Date().timeIntervalSince1970 - started : .infinity
             if !force && age < minAgeSeconds && rows.count < maxRows { return nil }
-            let body = Log.header + "\n" + rows.joined(separator: "\n") + "\n"
-            guard let gz = Gzip.compress(Data(body.utf8)) else { return nil }
-            let seq = lastSeq + 1
-            let name = String(format: "%08d", seq)
-            let times = rows.compactMap { r -> Int64? in
-                let f = r.split(separator: ",", omittingEmptySubsequences: false)
-                return f.count > 3 ? Int64(f[3]) : nil
-            }
-            let meta: [String: Any] = [
-                "device": Eyes.deviceId, "seq": seq, "kind": kind,
-                "from_ms": times.min() ?? 0, "to_ms": times.max() ?? 0, "rows": rows.count,
-                "bytes": gz.count, "sha256": SHA256.hash(data: gz).map { String(format: "%02x", $0) }.joined(),
-            ]
-            do {
-                let tmp = outbox.appendingPathComponent("\(name).csv.gz.tmp")
-                try gz.write(to: tmp, options: .atomic)
-                try JSONSerialization.data(withJSONObject: meta).write(
-                    to: outbox.appendingPathComponent("\(name).json"), options: .atomic)
-                try FileManager.default.moveItem(at: tmp, to: outbox.appendingPathComponent("\(name).csv.gz"))
-                try FileManager.default.removeItem(at: Log.current)
-                Eyes.defaults.set(seq + 1, forKey: "next_seq")
-                return seq
-            } catch {
-                return nil
-            }
+            guard Chunks.write(rows: rows.map(String.init), header: Log.header, kind: kind, timeField: 3) != nil
+            else { return nil }
+            try? FileManager.default.removeItem(at: Log.current)
+            return lastSeq
+        }
+    }
+
+    /// Writes rows as the next numbered chunk (gzip + .json meta). Call inside withEyesLock.
+    static func write(rows: [String], header: String, kind: String, timeField: Int) -> Int? {
+        let body = header + "\n" + rows.joined(separator: "\n") + "\n"
+        guard let gz = Gzip.compress(Data(body.utf8)) else { return nil }
+        let seq = lastSeq + 1
+        let name = String(format: "%08d", seq)
+        let times = rows.compactMap { r -> Int64? in
+            let f = r.split(separator: ",", omittingEmptySubsequences: false)
+            return f.count > timeField ? Int64(f[timeField]) : nil
+        }
+        let meta: [String: Any] = [
+            "device": Eyes.deviceId, "seq": seq, "kind": kind,
+            "from_ms": times.min() ?? 0, "to_ms": times.max() ?? 0, "rows": rows.count,
+            "bytes": gz.count, "sha256": SHA256.hash(data: gz).map { String(format: "%02x", $0) }.joined(),
+        ]
+        do {
+            let tmp = outbox.appendingPathComponent("\(name).csv.gz.tmp")
+            try gz.write(to: tmp, options: .atomic)
+            try JSONSerialization.data(withJSONObject: meta).write(
+                to: outbox.appendingPathComponent("\(name).json"), options: .atomic)
+            try FileManager.default.moveItem(at: tmp, to: outbox.appendingPathComponent("\(name).csv.gz"))
+            Eyes.defaults.set(seq + 1, forKey: "next_seq")
+            return seq
+        } catch {
+            return nil
         }
     }
 }

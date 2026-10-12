@@ -24,6 +24,8 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSMotionUsageDescription</key>
+	<string>iEyesApp records how the phone moves (accelerometer) for the research study, to tell when it is being carried or used.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
