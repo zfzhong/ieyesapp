@@ -1,0 +1,439 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		061401821E58FB973E2E3639 /* iEyesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7AD972EFD61FE244896649C /* iEyesApp.swift */; };
+		672E43B05465E6C7B740F765 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE205275F57AEFFA8B240C6B /* Shared.swift */; };
+		8E1D003E471A1E8D2AAF409A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6E7E8BB4A9EF4A00F1CDD3 /* ContentView.swift */; };
+		8FBE4404C2DA688A35848CBD /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE205275F57AEFFA8B240C6B /* Shared.swift */; };
+		F09CDB283AD222AFFC47B4BA /* EyesMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A896C9C9706FF42BF7579 /* EyesMonitor.swift */; };
+		F7408B370503E4E3F680DD05 /* EyesMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D73F74D7646198B55EA53B20 /* EyesMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		463122B9CBE70784B735557A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 738FC61517740C3CB36581B5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4E2DA1608A31D0BE38EB7F89;
+			remoteInfo = EyesMonitor;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8BA0CD03825B88ACAF345204 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F7408B370503E4E3F680DD05 /* EyesMonitor.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		02D69B51496C772A49C3A4CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0AEF83441C76CD800F43CD0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		39A0AE75EDAE17C5A13EC594 /* iEyesApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = iEyesApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		40159F54CBB6C5D9A326D2B6 /* iEyesApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iEyesApp.entitlements; sourceTree = "<group>"; };
+		5F94A2A36579A6A2A14D7ED1 /* EyesMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EyesMonitor.entitlements; sourceTree = "<group>"; };
+		AD2A896C9C9706FF42BF7579 /* EyesMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyesMonitor.swift; sourceTree = "<group>"; };
+		BC6E7E8BB4A9EF4A00F1CDD3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CE205275F57AEFFA8B240C6B /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		D73F74D7646198B55EA53B20 /* EyesMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = EyesMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7AD972EFD61FE244896649C /* iEyesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iEyesApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		262856AC6D9D9980464E5726 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CE205275F57AEFFA8B240C6B /* Shared.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		33CC461BCCA780DEDB4898E3 /* Monitor */ = {
+			isa = PBXGroup;
+			children = (
+				5F94A2A36579A6A2A14D7ED1 /* EyesMonitor.entitlements */,
+				AD2A896C9C9706FF42BF7579 /* EyesMonitor.swift */,
+				0AEF83441C76CD800F43CD0C /* Info.plist */,
+			);
+			path = Monitor;
+			sourceTree = "<group>";
+		};
+		354A275B238C4C2187966817 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				BC6E7E8BB4A9EF4A00F1CDD3 /* ContentView.swift */,
+				40159F54CBB6C5D9A326D2B6 /* iEyesApp.entitlements */,
+				E7AD972EFD61FE244896649C /* iEyesApp.swift */,
+				02D69B51496C772A49C3A4CB /* Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		3C5D2EDE5001C6109462962A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D73F74D7646198B55EA53B20 /* EyesMonitor.appex */,
+				39A0AE75EDAE17C5A13EC594 /* iEyesApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A815FEAF95EE8731973E66AF = {
+			isa = PBXGroup;
+			children = (
+				354A275B238C4C2187966817 /* App */,
+				33CC461BCCA780DEDB4898E3 /* Monitor */,
+				262856AC6D9D9980464E5726 /* Shared */,
+				3C5D2EDE5001C6109462962A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0FA77D534D6E28DDDBEF3E19 /* iEyesApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 31A9266EFD3104B1C22FACC3 /* Build configuration list for PBXNativeTarget "iEyesApp" */;
+			buildPhases = (
+				AB2E082F2870E65CE9E2928A /* Sources */,
+				8BA0CD03825B88ACAF345204 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				05EEB3000213E46F6EF51805 /* PBXTargetDependency */,
+			);
+			name = iEyesApp;
+			packageProductDependencies = (
+			);
+			productName = iEyesApp;
+			productReference = 39A0AE75EDAE17C5A13EC594 /* iEyesApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4E2DA1608A31D0BE38EB7F89 /* EyesMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E18DF5AC1CCC93F4A36E16C /* Build configuration list for PBXNativeTarget "EyesMonitor" */;
+			buildPhases = (
+				8738DAA8465AB6E5F9C1B623 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EyesMonitor;
+			packageProductDependencies = (
+			);
+			productName = EyesMonitor;
+			productReference = D73F74D7646198B55EA53B20 /* EyesMonitor.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		738FC61517740C3CB36581B5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					0FA77D534D6E28DDDBEF3E19 = {
+						DevelopmentTeam = ZFS9QR7REV;
+						ProvisioningStyle = Automatic;
+					};
+					4E2DA1608A31D0BE38EB7F89 = {
+						DevelopmentTeam = ZFS9QR7REV;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = CDE85A11D7B16EEC55CF0463 /* Build configuration list for PBXProject "iEyesApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A815FEAF95EE8731973E66AF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3C5D2EDE5001C6109462962A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0FA77D534D6E28DDDBEF3E19 /* iEyesApp */,
+				4E2DA1608A31D0BE38EB7F89 /* EyesMonitor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8738DAA8465AB6E5F9C1B623 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F09CDB283AD222AFFC47B4BA /* EyesMonitor.swift in Sources */,
+				8FBE4404C2DA688A35848CBD /* Shared.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AB2E082F2870E65CE9E2928A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E1D003E471A1E8D2AAF409A /* ContentView.swift in Sources */,
+				672E43B05465E6C7B740F765 /* Shared.swift in Sources */,
+				061401821E58FB973E2E3639 /* iEyesApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		05EEB3000213E46F6EF51805 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4E2DA1608A31D0BE38EB7F89 /* EyesMonitor */;
+			targetProxy = 463122B9CBE70784B735557A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		15E0CFA90C945ACF4D9030ED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/iEyesApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zfzhong.ieyesapp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		1FD4E635D1722D0616ADC7D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = ZFS9QR7REV;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				MARKETING_VERSION = 0.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		469A727BF35285EBB94AC2D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Monitor/EyesMonitor.entitlements;
+				INFOPLIST_FILE = Monitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zfzhong.ieyesapp.monitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6943CB636010552B1E8F528B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/iEyesApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zfzhong.ieyesapp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7955BDD8939625C3DE186117 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = ZFS9QR7REV;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				MARKETING_VERSION = 0.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9A0946DD72D91A503D8A1506 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Monitor/EyesMonitor.entitlements;
+				INFOPLIST_FILE = Monitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zfzhong.ieyesapp.monitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E18DF5AC1CCC93F4A36E16C /* Build configuration list for PBXNativeTarget "EyesMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A0946DD72D91A503D8A1506 /* Debug */,
+				469A727BF35285EBB94AC2D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		31A9266EFD3104B1C22FACC3 /* Build configuration list for PBXNativeTarget "iEyesApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6943CB636010552B1E8F528B /* Debug */,
+				15E0CFA90C945ACF4D9030ED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CDE85A11D7B16EEC55CF0463 /* Build configuration list for PBXProject "iEyesApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7955BDD8939625C3DE186117 /* Debug */,
+				1FD4E635D1722D0616ADC7D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 738FC61517740C3CB36581B5 /* Project object */;
+}

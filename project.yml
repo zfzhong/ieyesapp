@@ -1,0 +1,57 @@
+name: iEyesApp
+options:
+  bundleIdPrefix: com.zfzhong
+  deploymentTarget:
+    iOS: "17.4"
+settings:
+  base:
+    DEVELOPMENT_TEAM: ZFS9QR7REV
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  iEyesApp:
+    type: application
+    platform: iOS
+    sources: [App, Shared]
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: iEyesApp
+        UILaunchScreen: {}
+        BGTaskSchedulerPermittedIdentifiers: [com.zfzhong.ieyesapp.refresh]
+        UIBackgroundModes: [fetch]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        "UISupportedInterfaceOrientations~ipad": [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+    entitlements:
+      path: App/iEyesApp.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.com.zfzhong.ieyesapp]
+    dependencies:
+      - target: EyesMonitor
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zfzhong.ieyesapp
+        TARGETED_DEVICE_FAMILY: "1,2"
+  EyesMonitor:
+    type: app-extension
+    platform: iOS
+    sources: [Monitor, Shared]
+    info:
+      path: Monitor/Info.plist
+      properties:
+        CFBundleDisplayName: EyesMonitor
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).EyesMonitor
+    entitlements:
+      path: Monitor/EyesMonitor.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.com.zfzhong.ieyesapp]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zfzhong.ieyesapp.monitor
+        TARGETED_DEVICE_FAMILY: "1,2"
