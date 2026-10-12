@@ -105,15 +105,28 @@ struct ContentView: View {
                     }
                 }
             }
-            Button("Start monitoring") {
-                let errors = Monitor.armAll()
-                Log.append([Log.row("monitor_start", detail: [("categories", Categories.picked.count),
-                                                             ("ladders", Categories.ladders.count),
-                                                             ("errors", errors.count)])])
-                message = errors.isEmpty ? "Monitoring \(Monitor.monitoring.count) ladders." : errors.joined(separator: "\n")
-                refresh += 1
+            if Monitor.isActive {
+                Label("Monitoring in progress · \(Categories.picked.count) categories + total",
+                      systemImage: "dot.radiowaves.left.and.right")
+                    .foregroundStyle(.green)
+                Button("Stop monitoring", role: .destructive) {
+                    Monitor.stopAll()
+                    Log.append([Log.row("monitor_stop")])
+                    message = "Monitoring stopped."
+                    refresh += 1
+                }
+                .font(.caption)
+            } else {
+                Button("Start monitoring") {
+                    let errors = Monitor.armAll()
+                    Log.append([Log.row("monitor_start", detail: [("categories", Categories.picked.count),
+                                                                 ("ladders", Categories.ladders.count),
+                                                                 ("errors", errors.count)])])
+                    message = errors.isEmpty ? "" : errors.joined(separator: "\n")
+                    refresh += 1
+                }
+                .disabled(auth.authorizationStatus != .approved || Categories.picked.isEmpty)
             }
-            .disabled(auth.authorizationStatus != .approved || Categories.picked.isEmpty)
         } header: { Text("Categories") } footer: {
             Text("Select all categories in Apple's list (tap each category, or the \"All\" option, and no single apps). Naming is optional: tap \"Name it\" and choose the name shown on the left, so the log can say \"Social\" instead of c3.")
         }

@@ -311,6 +311,7 @@ enum Monitor {
     }
 
     static func armAll() -> [String] {
+        Eyes.defaults.set(false, forKey: "monitoring_stopped")
         // Drop ladders for categories no longer picked.
         let keep = Set(Categories.ladders.map(activity))
         center.stopMonitoring(center.activities.filter { !keep.contains($0) })
@@ -322,6 +323,17 @@ enum Monitor {
     }
 
     static var monitoring: [DeviceActivityName] { center.activities }
+
+    /// Every picked category and the total have a ladder running.
+    static var isActive: Bool {
+        let want = Set(Categories.ladders.map(activity))
+        return !want.isEmpty && want.isSubset(of: Set(center.activities))
+    }
+
+    static func stopAll() {
+        Eyes.defaults.set(true, forKey: "monitoring_stopped")
+        center.stopMonitoring()
+    }
 }
 
 // MARK: - Server

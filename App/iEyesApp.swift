@@ -10,7 +10,8 @@ struct IEyesApp: App {
     init() {
         Categories.migrateNamedTokens()
         // Keep the ladders armed whenever the app starts (also stops version 0.1's ladders).
-        if AuthorizationCenter.shared.authorizationStatus == .approved && !Categories.picked.isEmpty {
+        if AuthorizationCenter.shared.authorizationStatus == .approved && !Categories.picked.isEmpty
+            && !Eyes.defaults.bool(forKey: "monitoring_stopped") {
             _ = Monitor.armAll()
         }
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.refreshTask, using: nil) { task in
