@@ -15,6 +15,7 @@ struct IEyesApp: App {
             _ = Monitor.armAll()
         }
         Self.motionRun()
+        LiveMotion.shared.apply()
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.refreshTask, using: nil) { task in
             Self.backgroundRun(task as! BGAppRefreshTask)
         }
@@ -38,24 +39,18 @@ struct IEyesApp: App {
     }
 
     static func heartbeat(_ reason: String) {
-        UIDevice.current.isBatteryMonitoringEnabled = true
-        let level = UIDevice.current.batteryLevel
-        let state = UIDevice.current.batteryState
-        Log.append([Log.row("heartbeat", detail: [
-            ("reason", reason),
-            ("battery", level >= 0 ? Int(level * 100) : -1),
-            ("charging", state == .charging || state == .full ? 1 : 0),
-            ("categories", Categories.picked.count),
-            ("monitoring", Monitor.monitoring.count),
+        Heartbeat.write(reason, extra: [
             ("accel", Motion.authorized ? (Motion.enabled ? 1 : 0) : (Motion.denied ? -1 : 0)),
-            ("app", "ios-\(Eyes.appVersion)"),
-        ])])
+            ("keepalive", LiveMotion.shared.running ? 1 : 0),
+            ("location", LiveMotion.authName(LiveMotion.shared.authorization)),
+        ])
     }
 
     /// On screen: keep the accelerometer recorder going and read what it has, then upload.
     static func motionRun() {
         guard !Eyes.defaults.bool(forKey: "monitoring_stopped"), !Categories.picked.isEmpty else { return }
         Motion.keepRecording()
+        if LiveMotion.shared.running { return }    // live sensors cover it; their tick uploads
         Task.detached(priority: .utility) {
             if Motion.collect(budget: 60) > 0 { _ = Server.upload(wait: 60) }
         }

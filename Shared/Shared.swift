@@ -104,6 +104,29 @@ enum Log {
     }
 }
 
+// MARK: - Heartbeat
+
+enum Heartbeat {
+    /// A heartbeat row (the website uses these to show the device is alive). `minGap` skips it
+    /// if one was written less than that many seconds ago (the monitor extension wakes often).
+    static func write(_ reason: String, minGap: TimeInterval = 0, extra: [(String, Any)] = []) {
+        let now = Date().timeIntervalSince1970
+        if minGap > 0 && now - Eyes.defaults.double(forKey: "last_heartbeat") < minGap { return }
+        Eyes.defaults.set(now, forKey: "last_heartbeat")
+        var detail: [(String, Any)] = [("reason", reason)]
+        #if canImport(UIKit)
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        let level = UIDevice.current.batteryLevel
+        let state = UIDevice.current.batteryState
+        detail += [("battery", level >= 0 ? Int(level * 100) : -1),
+                   ("charging", state == .charging || state == .full ? 1 : 0)]
+        #endif
+        detail += [("categories", Categories.picked.count), ("monitoring", Monitor.monitoring.count),
+                   ("app", "ios-\(Eyes.appVersion)")] + extra
+        Log.append([Log.row("heartbeat", detail: detail)])
+    }
+}
+
 // MARK: - Chunks (numbered gzip files, kept until the server confirms them)
 
 enum Chunks {

@@ -8,7 +8,7 @@ settings:
     DEVELOPMENT_TEAM: ZFS9QR7REV
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.4"
+    MARKETING_VERSION: "0.5"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   iEyesApp:
@@ -20,9 +20,11 @@ targets:
       properties:
         CFBundleDisplayName: iEyesApp
         UILaunchScreen: {}
+        NSLocationWhenInUseUsageDescription: iEyesApp uses coarse location only so it can keep recording motion and uploading in the background. It never stores or sends your location.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Choose "Always" so iEyesApp can keep recording motion and uploading in the background. It uses coarse location only to stay running and never stores or sends your location.
         NSMotionUsageDescription: iEyesApp records how the phone moves (accelerometer) for the research study, to tell when it is being carried or used.
         BGTaskSchedulerPermittedIdentifiers: [com.zfzhong.ieyesapp.refresh]
-        UIBackgroundModes: [fetch]
+        UIBackgroundModes: [fetch, location]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         "UISupportedInterfaceOrientations~ipad": [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
     entitlements:

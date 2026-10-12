@@ -1,6 +1,7 @@
 import FamilyControls
 import ManagedSettings
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @StateObject private var auth = AuthorizationCenter.shared
@@ -22,6 +23,7 @@ struct ContentView: View {
                 statusSection
             }
             .navigationTitle("iEyesApp")
+            .onReceive(NotificationCenter.default.publisher(for: .eyesStateChanged)) { _ in refresh += 1 }
             .sheet(item: Binding(get: { picking.map { Picking(name: $0) } }, set: { picking = $0?.name })) { p in
                 pickerSheet(p.name)
             }
@@ -137,6 +139,29 @@ struct ContentView: View {
     private var motionSection: some View {
         Section {
             let _ = refresh
+            Toggle("Keep running in background", isOn: Binding(
+                get: { LiveMotion.wanted },
+                set: { LiveMotion.wanted = $0; LiveMotion.shared.apply(); refresh += 1 }))
+            if LiveMotion.wanted {
+                switch LiveMotion.shared.authorization {
+                case .authorizedAlways:
+                    Label(LiveMotion.shared.running ? "Running: accelerometer, gyroscope, compass · uploads every 10 min"
+                                                    : "Starting…", systemImage: "bolt.horizontal.circle")
+                        .foregroundStyle(.green).font(.caption)
+                case .authorizedWhenInUse:
+                    Text("Location is set to \"While Using\". For background running choose \"Always\" in Settings › iEyesApp › Location.")
+                        .foregroundStyle(.orange).font(.caption)
+                    Button("Open Settings") { if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) } }
+                        .font(.caption)
+                case .denied, .restricted:
+                    Text("Location access is off, so iEyesApp cannot keep running. Turn it on (Always) in Settings › iEyesApp › Location.")
+                        .foregroundStyle(.red).font(.caption)
+                    Button("Open Settings") { if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) } }
+                        .font(.caption)
+                default:
+                    Text("Waiting for location permission…").font(.caption).foregroundStyle(.secondary)
+                }
+            }
             if !Motion.available {
                 Text("This device cannot record motion in the background.").foregroundStyle(.secondary)
             } else if Motion.denied {
@@ -151,7 +176,7 @@ struct ContentView: View {
                 Text("Starts with monitoring.").foregroundStyle(.secondary)
             }
         } header: { Text("Motion") } footer: {
-            Text("The accelerometer is recorded by iOS in the background and read when iEyesApp runs: 5 samples a second while moving, 1 while still. The gyroscope and compass cannot run in the background on iOS.")
+            Text("Without background running, iOS records only the accelerometer and iEyesApp reads it when it runs. With it on, iEyesApp keeps running using location permission (coarse, about 3 km; no location is ever stored), reads the accelerometer, gyroscope and compass 5 times a second while unlocked and once a second while locked, and uploads every 10 minutes.")
         }
     }
 

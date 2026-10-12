@@ -24,11 +24,16 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Choose "Always" so iEyesApp can keep recording motion and uploading in the background. It uses coarse location only to stay running and never stores or sends your location.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>iEyesApp uses coarse location only so it can keep recording motion and uploading in the background. It never stores or sends your location.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>iEyesApp records how the phone moves (accelerometer) for the research study, to tell when it is being carried or used.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>location</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>

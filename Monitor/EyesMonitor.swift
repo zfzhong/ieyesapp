@@ -24,6 +24,7 @@ final class EyesMonitor: DeviceActivityMonitor {
         }
         do { try Monitor.arm(id) } catch { log("arm_error", id, [("error", error.localizedDescription)]) }
         // Send what is waiting; the open file is closed only once it is 15 min old or large.
+        Heartbeat.write("monitor", minGap: 5 * 60)
         Server.upload(wait: 15, force: false)
     }
 

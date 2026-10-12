@@ -1,4 +1,4 @@
-// Accelerometer for iEyesApp.
+// Accelerometer for iEyesApp (the recorder; see LiveMotion.swift for the keep-running mode).
 //
 // iOS keeps only one motion sensor running while an app is not on screen: CMSensorRecorder
 // records the accelerometer at about 50 Hz for up to 12 hours per request and keeps the
@@ -23,7 +23,7 @@ enum Motion {
     static let recordHours: Double = 12
     static let keepDays: Double = 3                 // what iOS keeps
     static let latency: TimeInterval = 5 * 60       // samples show up a few minutes late
-    static let maxRowsPerChunk = 20_000
+    static let maxRowsPerChunk = 6_000            // David: 6,000 records per motion file
 
     static var openFile: URL { Eyes.container.appendingPathComponent("sensor_open.csv") }
     private static let busy = NSLock()
@@ -124,6 +124,23 @@ enum Motion {
         }
     }
 
+    /// Rows from the live sensors (keep-running mode).
+    static func appendLive(_ rows: [String]) {
+        append(rows)
+        closeChunks(force: false)
+    }
+
+    /// The live sensors cover time up to `date`: the recorder need not be read for it.
+    static func markLiveThrough(_ date: Date) {
+        let t = date.timeIntervalSince1970
+        if t > Eyes.defaults.double(forKey: "accel_fetched_through") {
+            Eyes.defaults.set(t, forKey: "accel_fetched_through")
+        }
+    }
+
+    /// Closes whatever is in the open motion file into chunks.
+    static func closeOpen() { closeChunks(force: true) }
+
     private static func append(_ rows: [String]) {
         withEyesLock {
             let data = (rows.joined(separator: "\n") + "\n").data(using: .utf8)!
@@ -137,7 +154,7 @@ enum Motion {
         }
     }
 
-    /// Closes the open sensor file into chunks of at most 20,000 rows. Without `force`, only
+    /// Closes the open sensor file into chunks of at most 6,000 rows. Without `force`, only
     /// full chunks are closed and the rest stays open.
     private static func closeChunks(force: Bool) {
         withEyesLock {
