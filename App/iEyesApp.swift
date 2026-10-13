@@ -1,6 +1,7 @@
 import BackgroundTasks
 import FamilyControls
 import SwiftUI
+import UserNotifications
 
 @main
 struct IEyesApp: App {
@@ -8,6 +9,8 @@ struct IEyesApp: App {
     static let refreshTask = "com.zfzhong.ieyesapp.refresh"
 
     init() {
+        UNUserNotificationCenter.current().delegate = NotificationHandler.shared
+        PowerWatch.start()
         Categories.migrateNamedTokens()
         // Keep the ladders armed whenever the app starts (also stops version 0.1's ladders).
         if AuthorizationCenter.shared.authorizationStatus == .approved && !Categories.picked.isEmpty

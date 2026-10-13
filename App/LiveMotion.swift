@@ -96,6 +96,8 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         unlocked = UIApplication.shared.isProtectedDataAvailable
         startSensors()
 
+        Watchdog.requestPermission()
+        Watchdog.push()
         flushTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.flush() }
         timer = Timer.scheduledTimer(withTimeInterval: 10 * 60, repeats: true) { [weak self] _ in self?.tick() }
         Log.append([Log.row("keepalive_start", detail: [("location", Self.authName(location.authorizationStatus)),
@@ -119,6 +121,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         timer?.invalidate(); timer = nil
         flushTimer?.invalidate(); flushTimer = nil
         flush()
+        Watchdog.cancel()
         Log.append([Log.row("keepalive_stop")])
     }
 
@@ -195,6 +198,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         let late = Date().timeIntervalSince(lastTick) - 600
         lastTick = Date()
         if late > 60 { Log.append([Log.row("keepalive_late", detail: [("late_s", Int(late))])]) }
+        Watchdog.push()                      // still alive: move the "stopped" warning 30 min ahead
         flush()
         queue.addOperation {
             // Upload off the sensor queue so samples keep flowing while it runs.

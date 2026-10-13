@@ -121,6 +121,9 @@ enum Heartbeat {
         detail += [("battery", level >= 0 ? Int(level * 100) : -1),
                    ("charging", state == .charging || state == .full ? 1 : 0)]
         #endif
+        let pi = ProcessInfo.processInfo
+        let thermal = ["nominal", "fair", "serious", "critical"][min(max(pi.thermalState.rawValue, 0), 3)]
+        detail += [("low_power", pi.isLowPowerModeEnabled ? 1 : 0), ("thermal", thermal)]
         detail += [("categories", Categories.picked.count), ("monitoring", Monitor.monitoring.count),
                    ("app", "ios-\(Eyes.appVersion)")] + extra
         Log.append([Log.row("heartbeat", detail: detail)])

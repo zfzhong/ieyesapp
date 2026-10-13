@@ -176,7 +176,7 @@ struct ContentView: View {
                 Text("Starts with monitoring.").foregroundStyle(.secondary)
             }
         } header: { Text("Motion") } footer: {
-            Text("Without background running, iOS records only the accelerometer and iEyesApp reads it when it runs. With it on, iEyesApp keeps running using location permission (coarse, about 3 km; no location is ever stored), reads the accelerometer, gyroscope and compass 5 times a second while unlocked and once a second while locked, and uploads every 10 minutes. iOS shows a blue location indicator in the status bar while it runs.")
+            Text("Without background running, iOS records only the accelerometer and iEyesApp reads it when it runs. With it on, iEyesApp keeps running using location permission (coarse, about 3 km; no location is ever stored), reads the accelerometer, gyroscope and compass 5 times a second while unlocked and once a second while locked, and uploads every 10 minutes. iOS shows a blue location indicator in the status bar while it runs. If iOS stops iEyesApp, a notification asks you to tap it to resume.")
         }
     }
 
