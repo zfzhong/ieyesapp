@@ -123,7 +123,8 @@ enum Heartbeat {
         #endif
         let pi = ProcessInfo.processInfo
         let thermal = ["nominal", "fair", "serious", "critical"][min(max(pi.thermalState.rawValue, 0), 3)]
-        detail += [("low_power", pi.isLowPowerModeEnabled ? 1 : 0), ("thermal", thermal)]
+        detail += [("low_power", pi.isLowPowerModeEnabled ? 1 : 0), ("thermal", thermal),
+                   ("uptime_s", Int(pi.systemUptime))]       // boot time = row time - uptime (0.7)
         detail += [("categories", Categories.picked.count), ("monitoring", Monitor.monitoring.count),
                    ("app", "ios-\(Eyes.appVersion)")] + extra
         Log.append([Log.row("heartbeat", detail: detail)])
