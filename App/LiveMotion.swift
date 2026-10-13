@@ -105,6 +105,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
                                                        ("gyro", motion.isGyroAvailable ? 1 : 0),
                                                        ("mag", motion.isMagnetometerAvailable ? 1 : 0)])])
         IEyesApp.heartbeat("keepalive_start")
+        Categories.logNames("start")
     }
 
     private func stop() {

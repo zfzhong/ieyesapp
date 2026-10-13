@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var picking: String?           // the category being picked
     @State private var selection = FamilyActivitySelection()
     @State private var refresh = 0
+    @State private var naming = false             // the name-your-categories sheet
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,7 @@ struct ContentView: View {
             .sheet(item: Binding(get: { picking.map { Picking(name: $0) } }, set: { picking = $0?.name })) { p in
                 pickerSheet(p.name)
             }
+            .sheet(isPresented: $naming, onDismiss: { Categories.logNames("naming"); refresh += 1 }) { namingSheet }
         }
     }
 
@@ -87,6 +89,18 @@ struct ContentView: View {
                 picking = "all"
             }
             if !Categories.picked.isEmpty {
+                let left = Categories.unnamed
+                Button {
+                    naming = true
+                } label: {
+                    if left > 0 {
+                        Label("Name the categories (\(left) of \(Categories.picked.count) left)", systemImage: "exclamationmark.circle.fill")
+                            .foregroundStyle(.orange)
+                    } else {
+                        Label("All \(Categories.picked.count) categories named", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    }
+                }
                 HStack {
                     Text("All categories (total)").bold()
                     Spacer()
@@ -100,7 +114,7 @@ struct ContentView: View {
                         Text("\(Categories.reached(item.id)) min").font(.caption).foregroundStyle(.secondary)
                         Menu(Categories.name(item.id) ?? "Name it") {
                             ForEach(Eyes.categories, id: \.self) { n in
-                                Button(n) { Categories.setName(n, for: item.id); refresh += 1 }
+                                Button(n) { Categories.setName(n, for: item.id); Categories.logNames("menu"); refresh += 1 }
                             }
                             Button("No name", role: .destructive) { Categories.setName(nil, for: item.id); refresh += 1 }
                         }
@@ -132,7 +146,7 @@ struct ContentView: View {
                 .disabled(auth.authorizationStatus != .approved || Categories.picked.isEmpty)
             }
         } header: { Text("Categories") } footer: {
-            Text("Select all categories in Apple's list (tap each category, or the \"All\" option, and no single apps). Naming is optional: tap \"Name it\" and choose the name shown on the left, so the log can say \"Social\" instead of c3.")
+            Text("Select all categories in Apple's list (tap each category, or the \"All\" option, and no single apps). Then name each category: iOS does not tell apps which category is which, so iEyesApp shows each one's name and you choose the same name from the list.")
         }
     }
 
@@ -225,9 +239,47 @@ struct ContentView: View {
                             }
                             picking = nil
                             refresh += 1
+                            if Categories.unnamed > 0 {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { naming = true }
+                            }
                         }
                     }
                 }
+        }
+    }
+}
+
+extension ContentView {
+    /// One row per picked category: iOS draws its real name and icon (the app itself cannot read
+    /// them), and the participant picks the same name from the list.
+    var namingSheet: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(Categories.picked, id: \.id) { item in
+                        HStack {
+                            Label(item.token).labelStyle(.titleAndIcon)
+                            Spacer()
+                            Menu {
+                                ForEach(Eyes.categories, id: \.self) { n in
+                                    Button(n) { Categories.setName(n, for: item.id); refresh += 1 }
+                                }
+                            } label: {
+                                Text(Categories.name(item.id) ?? "Choose…")
+                                    .foregroundStyle(Categories.name(item.id) == nil ? .orange : .accentColor)
+                            }
+                        }
+                    }
+                } footer: {
+                    Text("For each row, choose the name shown on its left. This lets the study report \"Social 2 h\" instead of \"c10 2 h\". Nothing else about your apps is recorded.")
+                }
+            }
+            .id(refresh)
+            .navigationTitle("Name the categories")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { naming = false } }
+            }
         }
     }
 }

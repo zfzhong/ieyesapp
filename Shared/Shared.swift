@@ -25,7 +25,7 @@ enum Eyes {
     /// Names offered when the participant labels a picked category (Apple's Screen Time categories).
     static let categories = ["Social", "Games", "Entertainment", "Creativity", "Education", "Health & Fitness",
                              "Information & Reading", "Productivity & Finance", "Shopping & Food", "Travel",
-                             "Utilities", "Other"]
+                             "Utilities", "Sports", "Other"]
 
     static var container: URL {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)!
@@ -293,6 +293,18 @@ enum Categories {
         id == total ? "All categories" : Eyes.defaults.string(forKey: "name.\(id)")
     }
     static func setName(_ n: String?, for id: String) { Eyes.defaults.set(n, forKey: "name.\(id)") }
+
+    /// Picked categories with no name yet.
+    static var unnamed: Int { picked.filter { name($0.id) == nil }.count }
+
+    /// One row with every id and its name (c1=Social;c2=...), so the server can name the
+    /// category rows of any day, including those written before the names were chosen.
+    static func logNames(_ reason: String) {
+        guard !picked.isEmpty else { return }
+        let pairs: [(String, Any)] = picked.map { ($0.id, name($0.id) ?? "") }
+        Log.append([Log.row("category_names", detail: [("reason", reason), ("named", picked.count - unnamed),
+                                                       ("of", picked.count)] + pairs)])
+    }
 
     /// The ids that get a ladder: every picked category, plus the total.
     static var ladders: [String] { picked.isEmpty ? [] : picked.map(\.id) + [total] }
