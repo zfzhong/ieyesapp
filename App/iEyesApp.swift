@@ -41,8 +41,16 @@ struct IEyesApp: App {
         try? BGTaskScheduler.shared.submit(r)
     }
 
+    /// 1 when iOS has locked the protected files (phone locked), read straight from iOS.
+    /// Added in 0.7 because the lock notifications rarely arrived on a test iPhone (10-13).
+    static func lockedNow() -> Int {
+        let read = { UIApplication.shared.isProtectedDataAvailable ? 0 : 1 }
+        return Thread.isMainThread ? read() : DispatchQueue.main.sync(execute: read)
+    }
+
     static func heartbeat(_ reason: String) {
         Heartbeat.write(reason, extra: [
+            ("locked", lockedNow()),
             ("accel", Motion.authorized ? (Motion.enabled ? 1 : 0) : (Motion.denied ? -1 : 0)),
             ("keepalive", LiveMotion.shared.running ? 1 : 0),
             ("location", LiveMotion.authName(LiveMotion.shared.authorization)),

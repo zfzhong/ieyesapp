@@ -183,8 +183,18 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         Motion.appendLive(batch)
     }
 
+    /// Every minute (main thread): the lock state read straight from iOS. If the lock
+    /// notifications were missed (seen on a test iPhone, 10-13), log it and fix the rate.
+    private func checkLock() {
+        let now = UIApplication.shared.isProtectedDataAvailable
+        guard now != unlocked else { return }
+        Log.append([Log.row("lock_missed", detail: [("unlocked", now ? 1 : 0)])])
+        setUnlocked(now)
+    }
+
     /// Every minute: buffered rows to disk, and the recorder no longer needs to cover this time.
     private func flush() {
+        if Thread.isMainThread && running { checkLock() }
         queue.addOperation { [weak self] in
             self?.writeRows()
             Motion.markLiveThrough(Date())
