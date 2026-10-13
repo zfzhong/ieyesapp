@@ -25,7 +25,7 @@ enum Eyes {
     /// Names offered when the participant labels a picked category (Apple's Screen Time categories).
     static let categories = ["Social", "Games", "Entertainment", "Creativity", "Education", "Health & Fitness",
                              "Information & Reading", "Productivity & Finance", "Shopping & Food", "Travel",
-                             "Utilities", "Sports", "Other"]
+                             "Utilities", "Other", "All Apps & Categories"]
 
     static var container: URL {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)!
