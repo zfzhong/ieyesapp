@@ -199,6 +199,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         queue.addOperation {
             // Upload off the sensor queue so samples keep flowing while it runs.
             DispatchQueue.global(qos: .utility).async {
+                DispatchQueue.main.sync { _ = Monitor.ensureArmed("keepalive") }
                 IEyesApp.heartbeat("keepalive")
                 Motion.closeOpen()
                 Server.upload(wait: 60, force: false)

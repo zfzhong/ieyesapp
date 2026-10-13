@@ -25,7 +25,7 @@ struct IEyesApp: App {
         WindowGroup { ContentView() }
             .onChange(of: phase) { _, p in
                 if p == .background { Self.schedule() }
-                if p == .active { Self.motionRun(); LiveMotion.shared.apply() }
+                if p == .active { Monitor.ensureArmed("foreground"); Self.motionRun(); LiveMotion.shared.apply() }
             }
     }
 
@@ -59,6 +59,7 @@ struct IEyesApp: App {
     static func backgroundRun(_ task: BGAppRefreshTask) {
         schedule()
         let work = Task.detached {
+            await MainActor.run { _ = Monitor.ensureArmed("background") }
             heartbeat("background")
             if !Eyes.defaults.bool(forKey: "monitoring_stopped") { Motion.keepRecording() }
             Motion.collect(budget: 12)

@@ -380,6 +380,26 @@ enum Monitor {
 
     static var monitoring: [DeviceActivityName] { center.activities }
 
+    /// Re-arms any ladder iOS has dropped (seen 10-12: all 13 gone at ~14:05 with no stop or
+    /// error). Only missing ladders are armed, so running ones are not disturbed. Returns the
+    /// number re-armed.
+    @discardableResult
+    static func ensureArmed(_ reason: String) -> Int {
+        guard !Eyes.defaults.bool(forKey: "monitoring_stopped"), !Categories.picked.isEmpty,
+              AuthorizationCenter.shared.authorizationStatus == .approved else { return 0 }
+        let have = Set(center.activities)
+        let missing = Categories.ladders.filter { !have.contains(activity($0)) }
+        guard !missing.isEmpty else { return 0 }
+        var errors: [String] = []
+        for id in missing {
+            do { try arm(id) } catch { errors.append("\(id): \(error.localizedDescription)") }
+        }
+        Log.append([Log.row("monitor_rearm", detail: [("reason", reason), ("missing", missing.count),
+                                                     ("had", have.count), ("errors", errors.count),
+                                                     ("error", errors.first ?? "")])])
+        return missing.count
+    }
+
     /// Every picked category and the total have a ladder running.
     static var isActive: Bool {
         let want = Set(Categories.ladders.map(activity))
