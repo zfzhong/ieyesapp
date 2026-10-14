@@ -55,6 +55,7 @@ struct IEyesApp: App {
             ("keepalive", LiveMotion.shared.running ? 1 : 0),
             ("location", LiveMotion.authName(LiveMotion.shared.authorization)),
         ])
+        Activity.collect()           // iOS's own motion activity (automotive ...) since the last heartbeat
     }
 
     /// On screen: keep the accelerometer recorder going and read what it has, then upload.

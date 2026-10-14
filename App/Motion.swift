@@ -170,3 +170,76 @@ enum Motion {
         }
     }
 }
+
+
+// MARK: - Activity (iOS's own motion activity: automotive, walking, running, cycling, stationary)
+//
+// David 10-14: "use the phones' own vehicle detection as the main signal". iOS classifies the
+// phone's motion itself (from the motion coprocessor, cheap on battery) and keeps 7 days of history,
+// so it can be read back at each heartbeat even for times iEyesApp was not running. Same Motion &
+// Fitness permission as the accelerometer recorder. One row per change:
+//   motion_activity  (event_timestamp = when the activity began)
+//     activity = automotive | cycling | running | walking | stationary | unknown   (the main one)
+//     flags    = every flag iOS set (automotive+stationary = in a car at a light)
+//     confidence = low | medium | high
+enum Activity {
+    static let keepDays: Double = 7
+    private static let manager = CMMotionActivityManager()
+    private static let queue: OperationQueue = { let q = OperationQueue(); q.maxConcurrentOperationCount = 1; return q }()
+    private static let busy = NSLock()
+
+    static var available: Bool { CMMotionActivityManager.isActivityAvailable() }
+
+    static func main(_ a: CMMotionActivity) -> String {
+        if a.automotive { return "automotive" }
+        if a.cycling { return "cycling" }
+        if a.running { return "running" }
+        if a.walking { return "walking" }
+        if a.stationary { return "stationary" }
+        return "unknown"
+    }
+
+    static func flags(_ a: CMMotionActivity) -> String {
+        var f: [String] = []
+        if a.automotive { f.append("automotive") }
+        if a.cycling { f.append("cycling") }
+        if a.running { f.append("running") }
+        if a.walking { f.append("walking") }
+        if a.stationary { f.append("stationary") }
+        if a.unknown { f.append("unknown") }
+        return f.joined(separator: "+")
+    }
+
+    static func confidence(_ c: CMMotionActivityConfidence) -> String {
+        switch c { case .low: return "low"; case .medium: return "medium"; case .high: return "high"; @unknown default: return "?" }
+    }
+
+    /// Reads the activity history since the last read (at most 7 days back) and logs the changes.
+    static func collect() {
+        guard Motion.enabled, available, CMMotionActivityManager.authorizationStatus() == .authorized else { return }
+        guard busy.try() else { return }
+        let now = Date()
+        let t = Eyes.defaults.double(forKey: "activity_through")
+        let from = max(t > 0 ? Date(timeIntervalSince1970: t) : now.addingTimeInterval(-keepDays * 86400),
+                       now.addingTimeInterval(-keepDays * 86400 + 600))
+        manager.queryActivityStarting(from: from, to: now, to: queue) { list, error in
+            defer { busy.unlock() }
+            if let error = error {
+                Log.append([Log.row("motion_activity_error", detail: [("error", "\(error.localizedDescription)")])])
+                return
+            }
+            var last = Eyes.defaults.string(forKey: "activity_last") ?? ""
+            var rows: [String] = []
+            for a in list ?? [] where a.startDate >= from {
+                let key = "\(flags(a))/\(confidence(a.confidence))"
+                if key == last { continue }
+                last = key
+                rows.append(Log.row("motion_activity", at: a.startDate, detail: [
+                    ("activity", main(a)), ("flags", flags(a)), ("confidence", confidence(a.confidence))]))
+            }
+            Log.append(rows)
+            Eyes.defaults.set(last, forKey: "activity_last")
+            Eyes.defaults.set(now.timeIntervalSince1970, forKey: "activity_through")
+        }
+    }
+}
