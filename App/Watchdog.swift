@@ -47,9 +47,11 @@ final class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                                 withCompletionHandler done: @escaping () -> Void) {
-        if response.notification.request.identifier == Watchdog.id {
+        let rid = response.notification.request.identifier
+        if rid == Watchdog.id || rid == "eyes.nudge" {           // eyes.nudge: from the Screen Time extension (0.9)
             let fired = response.notification.date
-            Log.append([Log.row("watchdog_tap", detail: [("fired_ms", Int64(fired.timeIntervalSince1970 * 1000))])])
+            Log.append([Log.row(rid == Watchdog.id ? "watchdog_tap" : "nudge_tap",
+                                detail: [("fired_ms", Int64(fired.timeIntervalSince1970 * 1000))])])
         }
         done()
     }

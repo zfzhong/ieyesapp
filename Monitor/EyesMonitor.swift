@@ -4,6 +4,7 @@
 
 import DeviceActivity
 import Foundation
+import UserNotifications
 
 final class EyesMonitor: DeviceActivityMonitor {
 
@@ -25,7 +26,28 @@ final class EyesMonitor: DeviceActivityMonitor {
         do { try Monitor.arm(id) } catch { log("arm_error", id, [("error", error.localizedDescription)]) }
         // Send what is waiting; the open file is closed only once it is 15 min old or large.
         Heartbeat.write("monitor", minGap: 5 * 60)
+        nudgeIfStopped()
         Server.upload(wait: 15, force: false)
+    }
+
+    /// 0.9 (10-14): iEyesApp is often swiped away (a test iPhone, 13:40-17:09, 153 min of use while it was not
+    /// running). This extension keeps running, and a threshold means the phone is being used, so if the
+    /// app's keep-running mode has not been alive for 20 minutes, ask the person to open it (at most every
+    /// 30 minutes). LiveMotion.aliveKey is set at every 10-minute tick and removed when keep-running is
+    /// turned off on purpose.
+    private func nudgeIfStopped() {
+        let d = Eyes.defaults
+        guard !d.bool(forKey: "monitoring_stopped") else { return }
+        let last = d.double(forKey: "keepalive_alive_ms")
+        let now = Date().timeIntervalSince1970 * 1000
+        guard last > 0, now - last > 20 * 60 * 1000, now - d.double(forKey: "nudge_ms") > 30 * 60 * 1000 else { return }
+        d.set(now, forKey: "nudge_ms")
+        let c = UNMutableNotificationContent()
+        c.title = "iEyesApp is not running"
+        c.body = "It was closed. Tap to resume recording."
+        c.sound = .default
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "eyes.nudge", content: c, trigger: nil))
+        Log.append([Log.row("nudge", detail: [("down_min", Int((now - last) / 60000))])])
     }
 
     override func intervalDidStart(for activity: DeviceActivityName) {
