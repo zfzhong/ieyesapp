@@ -104,8 +104,32 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
                                                        ("state", UIApplication.shared.applicationState == .active ? "fg" : "bg"),
                                                        ("gyro", motion.isGyroAvailable ? 1 : 0),
                                                        ("mag", motion.isMagnetometerAvailable ? 1 : 0)])])
+        Self.noteDown()
         IEyesApp.heartbeat("keepalive_start")
+        Self.markAlive()
         Categories.logNames("start")
+    }
+
+    // Outages (0.9, 10-14: iEyesApp stopped on a test iPhone 13:40-17:09, likely swiped away; iOS says
+    // nothing about why). Each tick records when keep-running mode was last alive; when keep-running
+    // starts again more than downAfter later, an app_down row gives the stretch the app was not running,
+    // and whether the phone restarted inside it (uptime shorter than the stretch).
+    static let aliveKey = "keepalive_alive_ms"
+    static let downAfter: Double = 20 * 60 * 1000
+
+    static func markAlive() {
+        Eyes.defaults.set(Date().timeIntervalSince1970 * 1000, forKey: aliveKey)
+    }
+
+    static func noteDown() {
+        let last = Eyes.defaults.double(forKey: aliveKey)
+        let now = Date().timeIntervalSince1970 * 1000
+        guard last > 0, now - last > downAfter else { return }
+        let uptime = ProcessInfo.processInfo.systemUptime * 1000
+        Log.append([Log.row("app_down", detail: [("from_ms", Int64(last)), ("to_ms", Int64(now)),
+                                                 ("minutes", Int((now - last) / 60000)),
+                                                 ("rebooted", uptime < now - last ? 1 : 0),
+                                                 ("uptime_s", Int(uptime / 1000))])])
     }
 
     private func stop() {
@@ -123,6 +147,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         flushTimer?.invalidate(); flushTimer = nil
         flush()
         Watchdog.cancel()
+        Eyes.defaults.removeObject(forKey: Self.aliveKey)   // turned off on purpose: not an outage
         Log.append([Log.row("keepalive_stop")])
     }
 
@@ -210,6 +235,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         lastTick = Date()
         if late > 60 { Log.append([Log.row("keepalive_late", detail: [("late_s", Int(late))])]) }
         Watchdog.push()                      // still alive: move the "stopped" warning 30 min ahead
+        Self.markAlive()
         flush()
         queue.addOperation {
             // Upload off the sensor queue so samples keep flowing while it runs.
