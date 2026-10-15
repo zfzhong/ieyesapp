@@ -21,9 +21,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>1</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Choose "Always" so iEyesApp can keep recording motion and uploading in the background. It uses coarse location only to stay running and never stores or sends your location.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

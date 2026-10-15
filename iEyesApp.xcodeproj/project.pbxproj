@@ -14,7 +14,9 @@
 		8FBE4404C2DA688A35848CBD /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE205275F57AEFFA8B240C6B /* Shared.swift */; };
 		908185F152D36A266FD7F4B5 /* Watchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC077DF2CE1217116CBF7253 /* Watchdog.swift */; };
 		ADB26BC5312C05D28BE6ED0D /* LiveMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A9F17267F425789843FDCA /* LiveMotion.swift */; };
+		B340D45D47B64E3977781221 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13096FA30C1B4C4584339ED2 /* PrivacyInfo.xcprivacy */; };
 		B43A30B8EBE22B23C97153ED /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1376CA0207F0528566F6F /* Motion.swift */; };
+		F02C09BC700A69BD302575C0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3978CE63ECB86794BE9DEE44 /* PrivacyInfo.xcprivacy */; };
 		F09CDB283AD222AFFC47B4BA /* EyesMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A896C9C9706FF42BF7579 /* EyesMonitor.swift */; };
 		F7408B370503E4E3F680DD05 /* EyesMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D73F74D7646198B55EA53B20 /* EyesMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -47,7 +49,9 @@
 		02D69B51496C772A49C3A4CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0AA36130E3CA52CD935B1B6C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0AEF83441C76CD800F43CD0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		13096FA30C1B4C4584339ED2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2AC1376CA0207F0528566F6F /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
+		3978CE63ECB86794BE9DEE44 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		39A0AE75EDAE17C5A13EC594 /* iEyesApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = iEyesApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40159F54CBB6C5D9A326D2B6 /* iEyesApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iEyesApp.entitlements; sourceTree = "<group>"; };
 		5F94A2A36579A6A2A14D7ED1 /* EyesMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EyesMonitor.entitlements; sourceTree = "<group>"; };
@@ -75,6 +79,7 @@
 				5F94A2A36579A6A2A14D7ED1 /* EyesMonitor.entitlements */,
 				AD2A896C9C9706FF42BF7579 /* EyesMonitor.swift */,
 				0AEF83441C76CD800F43CD0C /* Info.plist */,
+				13096FA30C1B4C4584339ED2 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Monitor;
 			sourceTree = "<group>";
@@ -89,6 +94,7 @@
 				02D69B51496C772A49C3A4CB /* Info.plist */,
 				C8A9F17267F425789843FDCA /* LiveMotion.swift */,
 				2AC1376CA0207F0528566F6F /* Motion.swift */,
+				3978CE63ECB86794BE9DEE44 /* PrivacyInfo.xcprivacy */,
 				FC077DF2CE1217116CBF7253 /* Watchdog.swift */,
 			);
 			path = App;
@@ -141,6 +147,7 @@
 			buildConfigurationList = 1E18DF5AC1CCC93F4A36E16C /* Build configuration list for PBXNativeTarget "EyesMonitor" */;
 			buildPhases = (
 				8738DAA8465AB6E5F9C1B623 /* Sources */,
+				7C6817F5724779138B7491DC /* Resources */,
 			);
 			buildRules = (
 			);
@@ -198,6 +205,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				5D116A30DCF4DD53034B6C4B /* Assets.xcassets in Resources */,
+				F02C09BC700A69BD302575C0 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7C6817F5724779138B7491DC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B340D45D47B64E3977781221 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
