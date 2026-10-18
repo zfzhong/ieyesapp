@@ -3,16 +3,15 @@
 // iOS lets an app keep running in the background while it receives location updates. In this
 // mode iEyesApp asks for coarse location (about 3 km; Wi-Fi and cell towers, not GPS) only to
 // stay running; it never stores a location. While running it:
-//   - reads the accelerometer, gyroscope and magnetometer: 5 samples a second while the phone
-//     is unlocked, 1 a second while it is locked;
+//   - reads the accelerometer: 5 samples a second while the phone is unlocked, 1 a second while
+//     it is locked (0.10: the gyroscope and magnetometer are no longer read, David 10-17);
 //   - writes them as motion files of at most 6,000 rows;
 //   - uploads every 10 minutes, like Android.
 // If iOS stops the app (reboot, swiped away, location turned off), a significant location
 // change relaunches it; samples missed meanwhile are filled from the accelerometer recorder
-// (CMSensorRecorder), so accel has no gaps, gyro and mag do.
+// (CMSensorRecorder).
 //
-// Units and sign follow Android: accel m/s² (face up z ≈ +9.81), gyro rad/s, mag µT (raw,
-// not calibrated for hard-iron bias).
+// Units and sign follow Android: accel m/s² (face up z ≈ +9.81).
 
 import CoreLocation
 import CoreMotion
@@ -102,8 +101,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         timer = Timer.scheduledTimer(withTimeInterval: 10 * 60, repeats: true) { [weak self] _ in self?.tick() }
         Log.append([Log.row("keepalive_start", detail: [("location", Self.authName(location.authorizationStatus)),
                                                        ("state", UIApplication.shared.applicationState == .active ? "fg" : "bg"),
-                                                       ("gyro", motion.isGyroAvailable ? 1 : 0),
-                                                       ("mag", motion.isMagnetometerAvailable ? 1 : 0)])])
+                                                       ("sensors", "accel")])])
         Self.noteDown()
         IEyesApp.heartbeat("keepalive_start")
         Self.markAlive()
@@ -115,10 +113,14 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
     // starts again more than downAfter later, an app_down row gives the stretch the app was not running,
     // and whether the phone restarted inside it (uptime shorter than the stretch).
     static let aliveKey = "keepalive_alive_ms"
+    static let aliveUptimeKey = "keepalive_alive_uptime"     // 0.10: uptime at the same moment
     static let downAfter: Double = 20 * 60 * 1000
 
+    /// 0.10: called every minute (it was every 10 minutes), so app_down starts within a minute of
+    /// the real stop (10-17 on a test iPhone it started 4 minutes early, at the last heartbeat).
     static func markAlive() {
         Eyes.defaults.set(Date().timeIntervalSince1970 * 1000, forKey: aliveKey)
+        Proc.noteUptime(aliveUptimeKey)
     }
 
     static func noteDown() {
@@ -126,9 +128,12 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         let now = Date().timeIntervalSince1970 * 1000
         guard last > 0, now - last > downAfter else { return }
         let uptime = ProcessInfo.processInfo.systemUptime * 1000
+        // A smaller uptime than at the last alive mark is certain proof of a restart; without
+        // that mark (older builds) fall back to the old test.
+        let restarted = Proc.restartedSince(aliveUptimeKey) ?? (uptime < now - last)
         Log.append([Log.row("app_down", detail: [("from_ms", Int64(last)), ("to_ms", Int64(now)),
                                                  ("minutes", Int((now - last) / 60000)),
-                                                 ("rebooted", uptime < now - last ? 1 : 0),
+                                                 ("rebooted", restarted ? 1 : 0),
                                                  ("uptime_s", Int(uptime / 1000))])])
     }
 
@@ -136,8 +141,6 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
         guard running else { return }
         running = false
         motion.stopAccelerometerUpdates()
-        motion.stopGyroUpdates()
-        motion.stopMagnetometerUpdates()
         location.stopUpdatingLocation()
         location.stopMonitoringSignificantLocationChanges()
         location.allowsBackgroundLocationUpdates = false
@@ -163,8 +166,6 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
 
     private func startSensors() {
         motion.stopAccelerometerUpdates()
-        motion.stopGyroUpdates()
-        motion.stopMagnetometerUpdates()
         let dt = interval
         // CMLogItem.timestamp is seconds since boot, the same clock as systemUptime.
         let bootToWall = { (t: TimeInterval) -> Int64 in
@@ -176,20 +177,6 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
                 guard let d else { return }
                 let k = -9.80665
                 self?.add(bootToWall(d.timestamp), "accel", d.acceleration.x * k, d.acceleration.y * k, d.acceleration.z * k)
-            }
-        }
-        if motion.isGyroAvailable {
-            motion.gyroUpdateInterval = dt
-            motion.startGyroUpdates(to: queue) { [weak self] d, _ in
-                guard let d else { return }
-                self?.add(bootToWall(d.timestamp), "gyro", d.rotationRate.x, d.rotationRate.y, d.rotationRate.z)
-            }
-        }
-        if motion.isMagnetometerAvailable {
-            motion.magnetometerUpdateInterval = dt
-            motion.startMagnetometerUpdates(to: queue) { [weak self] d, _ in
-                guard let d else { return }
-                self?.add(bootToWall(d.timestamp), "mag", d.magneticField.x, d.magneticField.y, d.magneticField.z)
             }
         }
         Log.append([Log.row("motion_rate", detail: [("hz", Int((1 / dt).rounded())), ("unlocked", unlocked ? 1 : 0)])])
@@ -221,6 +208,7 @@ final class LiveMotion: NSObject, CLLocationManagerDelegate {
     /// Every minute: buffered rows to disk, and the recorder no longer needs to cover this time.
     private func flush() {
         if Thread.isMainThread && running { checkLock() }
+        if running { Self.markAlive() }
         queue.addOperation { [weak self] in
             self?.writeRows()
             Motion.markLiveThrough(Date())

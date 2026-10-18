@@ -45,19 +45,24 @@ enum Motion {
         return t > 0 ? Date(timeIntervalSince1970: t) : nil
     }
 
-    /// Keeps the recorder running: asks for another 12 hours when less than 6 remain.
+    /// Keeps the recorder running: asks for another 12 hours when less than 6 remain, or when the
+    /// phone has restarted since the last request (0.10: a restart ends the recording; on a test
+    /// iPhone 10-17 it recorded only 2 of the 185 minutes after a restart).
     /// The first call shows the Motion & Fitness permission prompt.
     static func keepRecording() {
         guard enabled, available, !denied else { return }
         let now = Date()
-        if let until = recordingUntil, until.timeIntervalSince(now) > 6 * 3600 { return }
+        let restarted = Proc.restartedSince("accel_record_uptime") ?? false
+        if !restarted, let until = recordingUntil, until.timeIntervalSince(now) > 6 * 3600 { return }
         CMSensorRecorder().recordAccelerometer(forDuration: recordHours * 3600)
+        Proc.noteUptime("accel_record_uptime")
         Eyes.defaults.set(now.addingTimeInterval(recordHours * 3600).timeIntervalSince1970,
                           forKey: "accel_recording_until")
         if Eyes.defaults.double(forKey: "accel_fetched_through") == 0 {
             Eyes.defaults.set(now.timeIntervalSince1970, forKey: "accel_fetched_through")
         }
-        Log.append([Log.row("accel_record", detail: [("hours", Int(recordHours))])])
+        Log.append([Log.row("accel_record", detail: [("hours", Int(recordHours)),
+                                                    ("reason", restarted ? "restart" : "renew")])])
     }
 
     /// Reads recorded samples (oldest first, an hour at a time) until `budget` seconds are used,

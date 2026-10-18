@@ -23,7 +23,11 @@ final class EyesMonitor: DeviceActivityMonitor {
                 [("minutes", minutes), ("step", Eyes.stepMinutes),
                  ("catchup", since < Monitor.catchUpSeconds ? 1 : 0), ("since_arm_s", Int(since))])
         }
-        do { try Monitor.arm(id) } catch { log("arm_error", id, [("error", error.localizedDescription)]) }
+        // 0.10: re-arm only when few armed steps are left (1-minute steps would otherwise restart the
+        // ladder every minute of use).
+        if Monitor.needsRearm(id) {
+            do { try Monitor.arm(id) } catch { log("arm_error", id, [("error", error.localizedDescription)]) }
+        }
         // Send what is waiting; the open file is closed only once it is 15 min old or large.
         Heartbeat.write("monitor", minGap: 5 * 60)
         nudgeIfStopped()
@@ -42,12 +46,16 @@ final class EyesMonitor: DeviceActivityMonitor {
         let now = Date().timeIntervalSince1970 * 1000
         guard last > 0, now - last > 20 * 60 * 1000, now - d.double(forKey: "nudge_ms") > 30 * 60 * 1000 else { return }
         d.set(now, forKey: "nudge_ms")
+        // 0.10: say so when the phone restarted (iOS does not start iEyesApp again after a restart;
+        // seen on a test iPhone 10-16 and 10-17).
+        let restarted = Proc.restartedSince("keepalive_alive_uptime") ?? false
         let c = UNMutableNotificationContent()
         c.title = "iEyesApp is not running"
-        c.body = "It was closed. Tap to resume recording."
+        c.body = restarted ? "Your phone restarted. Tap to resume recording."
+                           : "It was closed. Tap to resume recording."
         c.sound = .default
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "eyes.nudge", content: c, trigger: nil))
-        Log.append([Log.row("nudge", detail: [("down_min", Int((now - last) / 60000))])])
+        Log.append([Log.row("nudge", detail: [("down_min", Int((now - last) / 60000)), ("restarted", restarted ? 1 : 0)])])
     }
 
     override func intervalDidStart(for activity: DeviceActivityName) {

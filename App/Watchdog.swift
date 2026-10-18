@@ -7,9 +7,11 @@
 // restarts background running. Taps are logged (watchdog_tap) so we can count stops.
 //
 // Power: Low Power Mode and the thermal state are in every heartbeat (Heartbeat.write), and
-// each change is logged as it happens (low_power, thermal).
+// each change is logged as it happens (low_power, thermal). 0.10 (David 10-17, to see what a
+// charging station does): plugging in and unplugging are logged as they happen too (power).
 
 import Foundation
+import UIKit
 import UserNotifications
 
 enum Watchdog {
@@ -84,6 +86,19 @@ enum PowerWatch {
         }
         nc.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification, object: nil, queue: nil) { _ in
             Log.append([Log.row("thermal", detail: [("state", thermalName(ProcessInfo.processInfo.thermalState))])])
+        }
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        nc.addObserver(forName: UIDevice.batteryStateDidChangeNotification, object: nil, queue: .main) { _ in
+            let d = UIDevice.current
+            let state: String
+            switch d.batteryState {
+            case .charging: state = "charging"
+            case .full: state = "full"
+            case .unplugged: state = "unplugged"
+            default: state = "unknown"
+            }
+            Log.append([Log.row("power", detail: [("state", state),
+                                                  ("battery", d.batteryLevel >= 0 ? Int(d.batteryLevel * 100) : -1)])])
         }
     }
 }

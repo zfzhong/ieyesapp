@@ -5,6 +5,7 @@ import UserNotifications
 
 @main
 struct IEyesApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate   // 0.10: stop causes
     @Environment(\.scenePhase) private var phase
     static let refreshTask = "com.zfzhong.ieyesapp.refresh"
 
@@ -56,6 +57,27 @@ struct IEyesApp: App {
             ("location", LiveMotion.authName(LiveMotion.shared.authorization)),
         ])
         Activity.collect()           // iOS's own motion activity (automotive ...) since the last heartbeat
+        noteNotificationPermission()
+    }
+
+    /// 0.10: a notify_auth row whenever the notification permission changes (on another test iPhone the
+    /// nudges could not be shown, and nothing in the log said so until the app was opened).
+    static func noteNotificationPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { s in
+            let name: String
+            switch s.authorizationStatus {
+            case .authorized: name = "allowed"
+            case .provisional: name = "provisional"
+            case .ephemeral: name = "ephemeral"
+            case .denied: name = "denied"
+            default: name = "not_asked"
+            }
+            let shown = s.alertSetting == .enabled ? 1 : 0
+            let key = "\(name)/\(shown)"
+            guard Eyes.defaults.string(forKey: "notify_auth") != key else { return }
+            Eyes.defaults.set(key, forKey: "notify_auth")
+            Log.append([Log.row("notify_auth", detail: [("status", name), ("alerts", shown)])])
+        }
     }
 
     /// On screen: keep the accelerometer recorder going and read what it has, then upload.

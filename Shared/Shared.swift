@@ -1,8 +1,8 @@
 // Code shared by the app and the Screen Time monitor extension.
 //
 // iOS gives no per-app events. What it does give: a callback when the time spent in a
-// category of apps reaches a threshold. iEyesApp sets a 5-minute ladder per category
-// (5, 10, 15 ... minutes today) and logs each step it reaches. The log uses the same CSV
+// category of apps reaches a threshold. iEyesApp sets a 1-minute ladder per category
+// (1, 2, 3 ... minutes today; 5-minute steps before 0.10) and logs each step it reaches. The log uses the same CSV
 // columns, numbered gzip chunks and upload protocol as EyesApp on Android, so
 // eyes.geosketch.art takes it unchanged.
 
@@ -12,6 +12,7 @@ import DeviceActivity
 import FamilyControls
 import Foundation
 import ManagedSettings
+import os
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -19,8 +20,9 @@ import UIKit
 enum Eyes {
     static let appGroup = "group.com.zfzhong.ieyesapp"
     static let defaultServer = "https://eyes.geosketch.art"
-    static let stepMinutes = 5
-    static let lookahead = 3            // thresholds armed ahead, in case a callback is missed
+    static let stepMinutes = 1          // 0.10 (David 10-17): 1-minute steps (was 5)
+    static let lookahead = 10           // thresholds armed ahead, in case a callback is missed
+    static let rearmBelow = 3           // re-arm when fewer than this many armed steps are left
 
     /// Names offered when the participant labels a picked category (Apple's Screen Time categories).
     static let categories = ["Social", "Games", "Entertainment", "Creativity", "Education", "Health & Fitness",
@@ -104,6 +106,39 @@ enum Log {
     }
 }
 
+// MARK: - Memory and restarts (0.10)
+
+enum Proc {
+    /// This process's memory footprint (what iOS counts against its limit), in MB.
+    static var memoryMB: Int {
+        var info = task_vm_info_data_t()
+        var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<natural_t>.size)
+        let kr = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count)
+            }
+        }
+        return kr == KERN_SUCCESS ? Int(info.phys_footprint / 1_048_576) : -1
+    }
+
+    /// How much more this process may use before iOS ends it, in MB.
+    static var memoryLeftMB: Int { Int(os_proc_available_memory() / 1_048_576) }
+
+    /// True when the phone has restarted since `key` stored the uptime. Uptime only grows until a
+    /// restart, so a smaller uptime now is certain proof of one. (Before 0.10, app_down compared the
+    /// uptime with the length of the outage, but iOS's uptime stops while the phone sleeps, so a long
+    /// outage could look like a restart.)
+    static func restartedSince(_ key: String) -> Bool? {
+        let then = Eyes.defaults.double(forKey: key)
+        guard then > 0 else { return nil }
+        return ProcessInfo.processInfo.systemUptime < then
+    }
+
+    static func noteUptime(_ key: String) {
+        Eyes.defaults.set(ProcessInfo.processInfo.systemUptime, forKey: key)
+    }
+}
+
 // MARK: - Heartbeat
 
 enum Heartbeat {
@@ -125,6 +160,7 @@ enum Heartbeat {
         let thermal = ["nominal", "fair", "serious", "critical"][min(max(pi.thermalState.rawValue, 0), 3)]
         detail += [("low_power", pi.isLowPowerModeEnabled ? 1 : 0), ("thermal", thermal),
                    ("uptime_s", Int(pi.systemUptime))]       // boot time = row time - uptime (0.7)
+        detail += [("mem_mb", Proc.memoryMB), ("mem_left_mb", Proc.memoryLeftMB)]   // 0.10
         detail += [("categories", Categories.picked.count), ("monitoring", Monitor.monitoring.count),
                    ("app", "ios-\(Eyes.appVersion)")] + extra
         Log.append([Log.row("heartbeat", detail: detail)])
@@ -309,7 +345,7 @@ enum Categories {
     /// The ids that get a ladder: every picked category, plus the total.
     static var ladders: [String] { picked.isEmpty ? [] : picked.map(\.id) + [total] }
 
-    private static var today: String {
+    static var today: String {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         return f.string(from: Date())
@@ -349,7 +385,7 @@ enum Monitor {
         return (String(parts[0]), m)
     }
 
-    /// Arms the next few 5-minute steps above what the ladder reached today. Counting includes
+    /// Arms the next `lookahead` steps above what the ladder reached today. Counting includes
     /// earlier use today, so re-arming during the day loses nothing.
     static func arm(_ id: String) throws {
         let tokens: Set<ActivityCategoryToken> = id == Categories.total
@@ -365,8 +401,19 @@ enum Monitor {
         }
         Eyes.defaults.set(Date().timeIntervalSince1970, forKey: "armed_at.\(id)")
         Eyes.defaults.set(Date().timeIntervalSince1970 + 5, forKey: "rearming_until.\(id)")
+        Eyes.defaults.set(base + Eyes.lookahead * Eyes.stepMinutes, forKey: "armed_top.\(id)")
+        Eyes.defaults.set(Categories.today, forKey: "armed_day.\(id)")
         center.stopMonitoring([activity(id)])
         try center.startMonitoring(activity(id), during: schedule, events: events)
+    }
+
+    /// 0.10: with 1-minute steps, stopping and restarting a ladder at every step would happen
+    /// every minute of use. Re-arm only when few armed steps are left above what was reached, or
+    /// when the armed steps are from another day.
+    static func needsRearm(_ id: String) -> Bool {
+        let d = Eyes.defaults
+        guard d.string(forKey: "armed_day.\(id)") == Categories.today else { return true }
+        return Categories.reached(id) + Eyes.rearmBelow * Eyes.stepMinutes >= d.integer(forKey: "armed_top.\(id)")
     }
 
     /// Seconds since the ladder was last armed. A step that fires within catchUpSeconds of

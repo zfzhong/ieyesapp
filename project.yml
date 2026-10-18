@@ -8,8 +8,8 @@ settings:
     DEVELOPMENT_TEAM: ZFS9QR7REV
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.9"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.10"
+    CURRENT_PROJECT_VERSION: "10"
 targets:
   iEyesApp:
     type: application
