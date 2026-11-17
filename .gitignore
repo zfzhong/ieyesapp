@@ -2,3 +2,6 @@
 *.xcodeproj/project.xcworkspace/xcuserdata/
 build/
 DerivedData/
+
+# Internal working notes, kept on the Mac only (not shared on GitHub)
+eyesapp-ieyesapp-handoff.md
